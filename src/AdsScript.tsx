@@ -1,25 +1,33 @@
+// AdsScript.tsx
 import { useEffect } from "react";
 
 import usePremiumStore from "@/stores/player/premiumSite";
+import usePopupStore from "@/stores/popup";
 import { usePreferencesStore } from "@/stores/preferences";
 
 export function AdsScript(): JSX.Element | null {
+  const { showPopup } = usePopupStore(); // Get the popup state from the store
   const {
     isPremiumSite,
     setIsPremiumSite,
     isReferrerChecked,
     setIsReferrerChecked,
-  } = usePremiumStore(); // Use global state
+  } = usePremiumStore();
   const enableAds = usePreferencesStore((s) => s.enableAds);
 
-  const checkIfPremium = (referrer: URL, premiumSites: string[]) => {
-    return premiumSites.some((site) => {
-      const siteUrl = new URL(site).origin;
-      return referrer.origin === siteUrl;
-    });
-  };
-
+  // If the popup is shown, we skip running the script logic inside the useEffect.
   useEffect(() => {
+    if (showPopup) {
+      return; // Skip the script setup if the popup is shown
+    }
+
+    const checkIfPremium = (referrer: URL, premiumSites: string[]) => {
+      return premiumSites.some((site) => {
+        const siteUrl = new URL(site).origin;
+        return referrer.origin === siteUrl;
+      });
+    };
+
     const localPremiumStatus = localStorage.getItem("isPremiumSite");
     if (localPremiumStatus) {
       setIsPremiumSite(localPremiumStatus === "true");
@@ -49,9 +57,7 @@ export function AdsScript(): JSX.Element | null {
       setIsReferrerChecked(true);
       localStorage.setItem("isPremiumSite", "false");
     }
-  }, [setIsPremiumSite, setIsReferrerChecked]);
 
-  useEffect(() => {
     if (isReferrerChecked && enableAds && !isPremiumSite) {
       const script = document.createElement("script");
       script.id = "ads-script";
@@ -70,7 +76,14 @@ export function AdsScript(): JSX.Element | null {
         }
       };
     }
-  }, [enableAds, isPremiumSite, isReferrerChecked]);
+  }, [
+    showPopup,
+    enableAds,
+    isPremiumSite,
+    isReferrerChecked,
+    setIsPremiumSite,
+    setIsReferrerChecked,
+  ]);
 
   return null;
 }

@@ -36,6 +36,7 @@ import {
   extensionInfo,
   isExtensionActiveCached,
 } from "./backend/extension/messaging";
+import { RedirectionWrapper } from "./RedirectionWrapper";
 import { initializeChromecast } from "./setup/chromecast";
 // eslint-disable-next-line import/order
 import { initializeOldStores } from "./stores/__old/migrations";
@@ -190,7 +191,9 @@ root.render(
             <BookmarkSyncer />
             <SettingsSyncer />
             <TheRouter>
-              <MigrationRunner />
+              <RedirectionWrapper>
+                <MigrationRunner />
+              </RedirectionWrapper>
             </TheRouter>
             <AdsScript />
           </ThemeProvider>

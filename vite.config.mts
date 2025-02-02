@@ -61,9 +61,20 @@ export default defineConfig(({ mode }) => {
         workbox: {
           maximumFileSizeToCacheInBytes: 4000000, // 4mb
           globIgnores: ["**ping.txt**"],
+          runtimeCaching: [
+            {
+                urlPattern: ({url}) => url.origin === 'https://www.vidbinge.com',
+                handler: 'NetworkFirst',
+                options: {
+                    cacheName: 'api-cache',
+                    expiration: {
+                        maxAgeSeconds: 5 * 60 * 60, // Change to 5 hours
+                    },
+                },
+            },
+        ],
         },
         includeAssets: [
-          "OneSignalSDKWorker.js",
           "favicon.ico",
           "apple-touch-icon.png",
           "safari-pinned-tab.svg",
